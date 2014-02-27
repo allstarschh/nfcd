@@ -67,7 +67,8 @@ void NfcIpcSocket::initSocket()
 int NfcIpcSocket::getListenSocket() {
   const int nfcdConn = android_get_control_socket(NFCD_SOCKET_NAME);
   if (nfcdConn < 0) {
-    ALOGE("Could not connect to %s socket: %s\n", NFCD_SOCKET_NAME, strerror(errno));
+    //For testing, 
+    //ALOGE("Could not connect to %s socket: %s\n", NFCD_SOCKET_NAME, strerror(errno));
     return -1;
   }
 

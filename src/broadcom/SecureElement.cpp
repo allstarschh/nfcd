@@ -461,7 +461,7 @@ bool SecureElement::connectEE()
   startRfDiscovery(false);
 
   // TODO:
-    // Disable UICC idle timeout while the DH is connected
+  // Disable UICC idle timeout while the DH is connected
   //setUiccIdleTimeout (false);
 
   mNewSourceGate = 0;
@@ -1261,6 +1261,26 @@ void SecureElement::nfaEeCallback(tNFA_EE_EVT event, tNFA_EE_CBACK_DATA* eventDa
       sSecElem.mbNewEE = true;
     }
     break;
+  case NFA_EE_CONNECT_EVT:
+    {
+      SyncEventGuard guard(sSecElem.mConnectEvent);
+      ALOGD("%s: NFA_EE_NEW_EE_EVT  h=0x%X; status=%u; interface=%u",
+             __FUNCTION__, eventData->handle, eventData->connect.status, eventData->connect.ee_interface);
+      sSecElem.mConnectEvent.notifyOne();
+    }
+    break;
+  case NFA_EE_DISCONNECT_EVT:
+    {
+    }
+    break;
+  case NFA_EE_DATA_EVT:
+    {
+      SyncEventGuard guard(sSecElem.mDataEvent);
+      ALOGD("%s: NFA_EE_DATA_EVT h = 0x%X;",
+             __FUNCTION__, eventData->handle);
+      sSecElem.mDataEvent.notifyOne();
+    }
+    break;
   default:
     ALOGE("%s: unknown event=%u ????", __FUNCTION__, event);
     break;
@@ -1599,4 +1619,121 @@ bool SecureElement::isBusy()
   bool retval = (mCurrentRouteSelection == SecElemRoute) || mIsPiping;
   ALOGD("%s: %u", __FUNCTION__, retval);
   return retval;
+}
+
+void SecureElement::test()
+{
+  tNFA_STATUS nfaStat = NFA_STATUS_FAILED;
+  
+  if (mActualNumEe > 0)
+  {
+/*
+    ALOGD("[Dimi]connect interface APDU >>");
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_APDU, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface APDU << state = %d", nfaStat);
+    nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
+    ALOGD("[Dimi]disconnect interface APDU =%d", nfaStat);
+*/
+  }
+
+  if (mActualNumEe > 0)
+  {
+/*
+    ALOGD("[Dimi]connect interface HCI >>");
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_HCI_ACCESS, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface HCI << state = %d", nfaStat);
+
+    UINT8 data[13] = {0x00,0xA4,
+                      0x04,0x00,
+                      0x08,0xA0,
+                      0x00,0x00,
+                      0x00,0x03,
+                      0x00,0x00,
+                      0x00};
+
+        UINT8 data[26] = {0x0,0x00,0xA,0x04,
+                          0x0,0x04,0x0,0x00,
+                          0x0,0x08,0xA,0x00,
+                          0x0,0x00,0x0,0x00,
+                          0x0,0x00,0x0,0x03,
+                          0x0,0x00,0x0,0x00,
+                          0x0,0x00};
+    SyncEventGuard guard2(mDataEvent);
+    ALOGD("[Dimi]Senddata >>");
+    nfaStat = NFA_EeSendData(mEeInfo[0].ee_handle, 26, data);
+    mDataEvent.wait();
+    ALOGD("[Dimi]Senddata << state = %d", nfaStat);
+
+    nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
+    //ALOGD("[Dimi]disconnect interface HCI = %d", nfaStat);
+*/
+  }
+  {
+/*
+    const INT32 recvBufferMaxSize = 1024;
+    UINT8 recvBuffer [recvBufferMaxSize];
+    INT32 recvBufferActualSize = 0;
+
+    UINT8 data[13] = {0x00,0xA4,
+                      0x04,0x00,
+                      0x08,0xA0,
+                      0x00,0x00,
+                      0x00,0x03,
+                      0x00,0x00,
+                      0x00};
+    UINT8 data[4] = {0x00, 0x00, 0x00, 0x00};
+    ALOGD("[Dimi]transceive >>");
+    transceive(data, 4, recvBuffer, recvBufferMaxSize, recvBufferActualSize, 1000);
+    ALOGD("[Dimi]transceive <<");
+*/
+  }
+/*
+  if (mActualNumEe > 0)
+  {
+    ALOGD("[Dimi]connect interface proprietary >>", nfaStat);
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_PROPRIETARY, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface proprietary << state = %d", nfaStat);
+    nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
+    ALOGD("[Dimi]disconnect interface proprietary =%d", nfaStat);
+  }
+
+  if (mActualNumEe > 1)
+  {
+    ALOGD("[Dimi]connect interface APDU >>");
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_APDU, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface APDU << state = %d", nfaStat);
+    nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
+    ALOGD("[Dimi]disconnect interface APDU =%d", nfaStat);
+  }
+
+  if (mActualNumEe > 1)
+  {
+    ALOGD("[Dimi]connect interface HCI >>");
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_HCI_ACCESS, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface HCI << state = %d", nfaStat);
+    nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
+    ALOGD("[Dimi]disconnect interface HCI = %d", nfaStat);
+  }
+
+  if (mActualNumEe > 1)
+  {
+    ALOGD("[Dimi]connect interface proprietary >>", nfaStat);
+    SyncEventGuard guard(mConnectEvent);
+    nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_PROPRIETARY, nfaEeCallback);
+    mConnectEvent.wait();
+    ALOGD("[Dimi]connect interface proprietary << state = %d", nfaStat);
+    nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
+    ALOGD("[Dimi]disconnect interface proprietary =%d", nfaStat);
+  }
+*/
 }

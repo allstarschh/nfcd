@@ -152,6 +152,10 @@ bool MessageHandler::handleConfigRequest(Parcel& parcel)
   // TODO, what does NFC_POWER_FULL mean
   // - OFF -> ON?
   // - Low Power -> Full Power?
+// For testing, do not follow UI setting.
+  return true;
+
+/*
   int powerLevel = parcel.readInt32();
   bool value;
   switch (powerLevel) {
@@ -164,6 +168,7 @@ bool MessageHandler::handleConfigRequest(Parcel& parcel)
       return mService->handleEnterLowPowerRequest(value);
   }
   return false;
+*/
 
 }
 

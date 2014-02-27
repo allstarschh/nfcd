@@ -33,6 +33,8 @@ extern "C"
 #define LOG_TAG "BroadcomNfc"
 #include <cutils/log.h>
 
+#define ALOGD ALOGE
+
 extern bool gIsTagDeactivating;
 extern bool gIsSelectingRfInterface;
 
@@ -129,7 +131,7 @@ bool NfcManager::initialize()
 
     stat = NFA_Enable(nfaDeviceManagementCallback, nfaConnectionCallback);
     if (stat == NFA_STATUS_OK) {
-      num = initializeGlobalAppLogLevel();
+      num = 5;//initializeGlobalAppLogLevel();
       CE_SetTraceLevel(num);
       LLCP_SetTraceLevel(num);
       NFC_SetTraceLevel(num);
@@ -360,6 +362,9 @@ void NfcManager::doSelectSecureElement()
   startRfDiscovery(true);
   PowerSwitch::getInstance().setModeOn(PowerSwitch::SE_ROUTING);
 
+  // testing
+  // SecureElement::getInstance().test();
+
 TheEnd:
   ALOGD("%s: exit", __FUNCTION__);
 }
@@ -541,6 +546,9 @@ int NfcManager::doOpenSecureElementConnection()
 
 TheEnd:
   ALOGD("%s: exit; return handle=0x%X", __FUNCTION__, secElemHandle);
+
+  SecureElement::getInstance().test();
+
   return secElemHandle;
 }
 

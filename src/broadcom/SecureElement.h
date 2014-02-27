@@ -236,6 +236,8 @@ public:
    */
   bool isRfFieldOn();
 
+  void test();
+
 private:
   static const unsigned int MAX_RESPONSE_SIZE = 1024;
   enum RouteSelection {NoRoute, DefaultRoute, SecElemRoute};
@@ -282,6 +284,8 @@ private:
   SyncEvent mTransceiveEvent;
   SyncEvent mVerInfoEvent;
   SyncEvent mRegistryEvent;
+  SyncEvent mConnectEvent;
+  SyncEvent mDataEvent;
   uint8_t mVerInfo [3];
   uint8_t mResponseData [MAX_RESPONSE_SIZE];
   RouteDataSet mRouteDataSet; //routing data
