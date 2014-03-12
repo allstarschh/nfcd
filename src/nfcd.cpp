@@ -22,6 +22,8 @@ int main() {
 
   service->enableNfc();
   service->enableDiscovery();
+  std::vector<uint32_t> seList;
+  pNfcManager->doGetSecureElementList(seList);
   service->selectSE();
 
   // Create IPC socket & main thread will enter while loop to read data from socket.

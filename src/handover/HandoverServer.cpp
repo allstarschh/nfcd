@@ -144,7 +144,9 @@ void HandoverServer::start()
   ALOGD("%s: enter", FUNC);
 
   INfcManager* pINfcManager = NfcService::getNfcManager();
+  ALOGD("%s before calling createLlcpServerSocket mServiceSap=%d", __func__, mServiceSap);
   mServerSocket = pINfcManager->createLlcpServerSocket(mServiceSap, DEFAULT_SERVICE_NAME, DEFAULT_MIU, 1, 1024);
+  ALOGD("%s after calling createLlcpServerSocket mServiceSap=%d", __func__, mServiceSap);
 
   if (!mServerSocket) {
     ALOGE("%s: cannot create llcp server socket", FUNC);
