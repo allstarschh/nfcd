@@ -78,6 +78,7 @@ bool SecureElement::initialize()
 
   // active SE, if not set active all SEs.
   if (GetNumValue("ACTIVE_SE", &num, sizeof(num))) {
+    ALOGD("%s GetNumValue num=%d", __func__, &num);
     mActiveSeOverride = num;
   }
   ALOGD("%s: Active SE override: 0x%X", __FUNCTION__, mActiveSeOverride);
@@ -266,7 +267,7 @@ bool SecureElement::isActivatedInListenMode()
 
 void SecureElement::getListOfEeHandles(std::vector<uint32_t>& listSe)
 {
-  ALOGD("%s: enter", __FUNCTION__);
+  ALOGD("%s: enter mActualNumEe =%d mNumEePresent =%d", __FUNCTION__,mActualNumEe , mNumEePresent );
   if (mNumEePresent == 0) {
     return;
   }
@@ -278,12 +279,14 @@ void SecureElement::getListOfEeHandles(std::vector<uint32_t>& listSe)
 
   // Get Fresh EE info.
   if (!getEeInfo()) {
+    ALOGE("no EE info");
     return;
   }
 
   int cnt = 0;
   for (int i = 0; i < mActualNumEe && cnt < mNumEePresent; i++) {
-    ALOGD("%s: %u = 0x%X", __FUNCTION__, i, mEeInfo[i].ee_handle);
+    ALOGD("%s: handle[%u] = 0x%X", __FUNCTION__, i, mEeInfo[i].ee_handle);
+    ALOGD("%s: mEeInfo[%d].num_interface=%d. ee_interface=%d", __func__, i, mEeInfo[i].num_interface,mEeInfo[i].ee_interface[0]);
     if ((mEeInfo[i].num_interface == 0) || 
         (mEeInfo[i].ee_interface[0] == NCI_NFCEE_INTERFACE_HCI_ACCESS)) {
       continue;
@@ -332,7 +335,9 @@ bool SecureElement::activate(uint32_t seID)
   for (int index = 0; index < mActualNumEe; index++) {
     tNFA_EE_INFO& eeItem = mEeInfo[index];
 
-    if ((eeItem.ee_handle == EE_HANDLE_0xF3) || (eeItem.ee_handle == EE_HANDLE_0xF4)) {
+    ALOGD("%s: eeItem.ee_handle=%x", __func__, eeItem.ee_handle);
+    if ((eeItem.ee_handle == EE_HANDLE_0xF3) || (eeItem.ee_handle == EE_HANDLE_0xF4) ||
+        (eeItem.ee_handle == EE_HANDLE_0x01) || (eeItem.ee_handle == EE_HANDLE_0x02)) {
       if (overrideEeHandle && (overrideEeHandle != eeItem.ee_handle)) {
         continue;   // do not enable all SEs; only the override one
       }
@@ -1480,18 +1485,24 @@ tNFA_EE_INFO *SecureElement::findEeByHandle(tNFA_HANDLE eeHandle)
 
 tNFA_HANDLE SecureElement::getDefaultEeHandle()
 {
+  ALOGD("%s enter, mActiveSeOverride=%d, mActualNumEe=%d", __func__, mActiveSeOverride, mActualNumEe);
   uint16_t overrideEeHandle = NFA_HANDLE_GROUP_EE | mActiveSeOverride;
   // Find the first EE that is not the HCI Access i/f.
   for (uint8_t i = 0; i < mActualNumEe; i++) {
     if (mActiveSeOverride && (overrideEeHandle != mEeInfo[i].ee_handle)) {
       continue; //skip all the EE's that are ignored
     }
+    ALOGD("%s i=%d, num_interface=%d, ee_interface[0]=%d, ee_status=%d",
+            __func__, i, mEeInfo[i].num_interface, mEeInfo[i].ee_interface[0], mEeInfo[i].ee_status);
     if ((mEeInfo[i].num_interface != 0) &&
         (mEeInfo[i].ee_interface[0] != NCI_NFCEE_INTERFACE_HCI_ACCESS) &&
         (mEeInfo[i].ee_status != NFC_NFCEE_STATUS_INACTIVE)) {
+
+      ALOGD("%s exit, return handle %d", __func__, mEeInfo[i].ee_handle);
       return mEeInfo[i].ee_handle;
     }
   }
+  ALOGD("%s exit, return INValid handle", __func__);
   return NFA_HANDLE_INVALID;
 }
 
@@ -1627,50 +1638,46 @@ void SecureElement::test()
   
   if (mActualNumEe > 0)
   {
-/*
-    ALOGD("[Dimi]connect interface APDU >>");
+    ALOGD("[Dimi]connect 0 interface APDU >>");
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_APDU, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface APDU << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 0 interface APDU << state = %d", nfaStat);
     nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
-    ALOGD("[Dimi]disconnect interface APDU =%d", nfaStat);
-*/
+    ALOGD("[Dimi]disconnect 0 interface APDU =%d", nfaStat);
   }
 
   if (mActualNumEe > 0)
   {
-/*
-    ALOGD("[Dimi]connect interface HCI >>");
+    ALOGD("[Dimi]connect 0 interface HCI >>");
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_HCI_ACCESS, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface HCI << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 0 interface HCI << state = %d", nfaStat);
 
-    UINT8 data[13] = {0x00,0xA4,
-                      0x04,0x00,
-                      0x08,0xA0,
-                      0x00,0x00,
-                      0x00,0x03,
-                      0x00,0x00,
-                      0x00};
+//    UINT8 data[13] = {0x00,0xA4,
+//                      0x04,0x00,
+//                      0x08,0xA0,
+//                      0x00,0x00,
+//                      0x00,0x03,
+//                      0x00,0x00,
+//                      0x00};
 
-        UINT8 data[26] = {0x0,0x00,0xA,0x04,
-                          0x0,0x04,0x0,0x00,
-                          0x0,0x08,0xA,0x00,
-                          0x0,0x00,0x0,0x00,
-                          0x0,0x00,0x0,0x03,
-                          0x0,0x00,0x0,0x00,
-                          0x0,0x00};
-    SyncEventGuard guard2(mDataEvent);
-    ALOGD("[Dimi]Senddata >>");
-    nfaStat = NFA_EeSendData(mEeInfo[0].ee_handle, 26, data);
-    mDataEvent.wait();
-    ALOGD("[Dimi]Senddata << state = %d", nfaStat);
+//        UINT8 data[26] = {0x0,0x00,0xA,0x04,
+//                          0x0,0x04,0x0,0x00,
+//                          0x0,0x08,0xA,0x00,
+//                          0x0,0x00,0x0,0x00,
+//                          0x0,0x00,0x0,0x03,
+//                          0x0,0x00,0x0,0x00,
+//                          0x0,0x00};
+//    SyncEventGuard guard2(mDataEvent);
+//    ALOGD("[Dimi]Senddata >>");
+//    nfaStat = NFA_EeSendData(mEeInfo[0].ee_handle, 26, data);
+//    mDataEvent.wait();
+//    ALOGD("[Dimi]Senddata << state = %d", nfaStat);
 
     nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
-    //ALOGD("[Dimi]disconnect interface HCI = %d", nfaStat);
-*/
+    ALOGD("[Dimi]disconnect interface HCI = %d", nfaStat);
   }
   {
 /*
@@ -1691,49 +1698,47 @@ void SecureElement::test()
     ALOGD("[Dimi]transceive <<");
 */
   }
-/*
   if (mActualNumEe > 0)
   {
-    ALOGD("[Dimi]connect interface proprietary >>", nfaStat);
+    ALOGD("[Dimi]connect 0 interface proprietary >>", nfaStat);
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[0].ee_handle, NFC_NFCEE_INTERFACE_PROPRIETARY, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface proprietary << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 0 interface proprietary << state = %d", nfaStat);
     nfaStat = NFA_EeDisconnect(mEeInfo[0].ee_handle);
-    ALOGD("[Dimi]disconnect interface proprietary =%d", nfaStat);
+    ALOGD("[Dimi]disconnect 0 interface proprietary =%d", nfaStat);
   }
 
   if (mActualNumEe > 1)
   {
-    ALOGD("[Dimi]connect interface APDU >>");
+    ALOGD("[Dimi]connect 1 interface APDU >>");
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_APDU, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface APDU << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 1 interface APDU << state = %d", nfaStat);
     nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
-    ALOGD("[Dimi]disconnect interface APDU =%d", nfaStat);
+    ALOGD("[Dimi]disconnect 1 interface APDU =%d", nfaStat);
   }
 
   if (mActualNumEe > 1)
   {
-    ALOGD("[Dimi]connect interface HCI >>");
+    ALOGD("[Dimi]connect 1 interface HCI >>");
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_HCI_ACCESS, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface HCI << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 1 interface HCI << state = %d", nfaStat);
     nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
-    ALOGD("[Dimi]disconnect interface HCI = %d", nfaStat);
+    ALOGD("[Dimi]disconnect 1 interface HCI = %d", nfaStat);
   }
 
   if (mActualNumEe > 1)
   {
-    ALOGD("[Dimi]connect interface proprietary >>", nfaStat);
+    ALOGD("[Dimi]connect 1 interface proprietary >>", nfaStat);
     SyncEventGuard guard(mConnectEvent);
     nfaStat = NFA_EeConnect(mEeInfo[1].ee_handle, NFC_NFCEE_INTERFACE_PROPRIETARY, nfaEeCallback);
     mConnectEvent.wait();
-    ALOGD("[Dimi]connect interface proprietary << state = %d", nfaStat);
+    ALOGD("[Dimi]connect 1 interface proprietary << state = %d", nfaStat);
     nfaStat = NFA_EeDisconnect(mEeInfo[1].ee_handle);
-    ALOGD("[Dimi]disconnect interface proprietary =%d", nfaStat);
+    ALOGD("[Dimi]disconnect 1 interface proprietary =%d", nfaStat);
   }
-*/
 }

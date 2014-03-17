@@ -153,9 +153,8 @@ bool MessageHandler::handleConfigRequest(Parcel& parcel)
   // - OFF -> ON?
   // - Low Power -> Full Power?
 // For testing, do not follow UI setting.
-  return true;
+//  return true;
 
-/*
   int powerLevel = parcel.readInt32();
   bool value;
   switch (powerLevel) {
@@ -168,7 +167,6 @@ bool MessageHandler::handleConfigRequest(Parcel& parcel)
       return mService->handleEnterLowPowerRequest(value);
   }
   return false;
-*/
 
 }
 

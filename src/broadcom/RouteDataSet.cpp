@@ -59,7 +59,7 @@ bool RouteDataSet::initialize()
   //check that the libxml2 version in use is compatible
   //with the version the software has been compiled with
   // TODO : What's this ...
-  //LIBXML_TEST_VERSION
+  LIBXML_TEST_VERSION
   ALOGD("%s: exit; return=true", __FUNCTION__);
   return true;
 }

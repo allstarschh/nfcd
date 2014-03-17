@@ -20,11 +20,11 @@ int main() {
   MessageHandler* msgHandler = new MessageHandler(service);
   service->initialize(pNfcManager, msgHandler);
 
-  service->enableNfc();
-  service->enableDiscovery();
-  std::vector<uint32_t> seList;
-  pNfcManager->doGetSecureElementList(seList);
-  service->selectSE();
+//  service->enableNfc();
+//  service->enableDiscovery();
+//  std::vector<uint32_t> seList;
+//  pNfcManager->doGetSecureElementList(seList);
+//  service->selectSE();
 
   // Create IPC socket & main thread will enter while loop to read data from socket.
   NfcIpcSocket* socket = NfcIpcSocket::Instance();
