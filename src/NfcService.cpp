@@ -568,6 +568,7 @@ void NfcService::handleEnableResponse(NfcEvent* event)
       enableNfc();
       enableDiscovery();
     }
+    selectSE();
   } else {
     disableNfc();
     disableDiscovery();
