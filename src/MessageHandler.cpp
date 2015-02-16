@@ -96,22 +96,22 @@ void MessageHandler::processRequest(const uint8_t* data, size_t dataLen)
   }
 
   switch (request) {
-    case NFC_REQUEST_CHANGE_RF_STATE:
+    case NfcRequest::ChangeRFState:
       handleChangeRFStateRequest(parcel);
       break;
-    case NFC_REQUEST_READ_NDEF:
+    case NfcRequest::ReadNDEF:
       handleReadNdefRequest(parcel);
       break;
-    case NFC_REQUEST_WRITE_NDEF:
+    case NfcRequest::WriteNDEF:
       handleWriteNdefRequest(parcel);
       break;
-    case NFC_REQUEST_MAKE_NDEF_READ_ONLY:
-      handleMakeNdefReadonlyRequest(parcel);
+    case NfcRequest::MakeReadOnly:
+      handleMakeReadonlyRequest(parcel);
       break;
-    case NFC_REQUEST_FORMAT:
-      handleNdefFormatRequest(parcel);
+    case NfcRequest::Format:
+      handleFormatRequest(parcel);
       break;
-    case NFC_REQUEST_TRANSCEIVE:
+    case NfcRequest::Transceive:
       handleTagTransceiveRequest(parcel);
       break;
     default:
@@ -257,15 +257,15 @@ bool MessageHandler::handleWriteNdefRequest(Parcel& parcel)
   return mService->handleWriteNdefRequest(ndefMessage, isP2P);
 }
 
-bool MessageHandler::handleMakeNdefReadonlyRequest(Parcel& parcel)
+bool MessageHandler::handleMakeReadonlyRequest(Parcel& parcel)
 {
-  mService->handleMakeNdefReadonlyRequest();
+  mService->handleMakeReadonlyRequest();
   return true;
 }
 
-bool MessageHandler::handleNdefFormatRequest(Parcel& parcel)
+bool MessageHandler::handleFormatRequest(Parcel& parcel)
 {
-  mService->handleNdefFormatRequest();
+  mService->handleFormatRequest();
   return true;
 }
 

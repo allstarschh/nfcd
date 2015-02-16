@@ -45,14 +45,6 @@ extern "C" {
  */
 
 /**
- * Message types sent from NFCC (NFC Controller)
- */
-typedef enum {
-  NFCC_MESSAGE_RESPONSE = 0,
-  NFCC_MESSAGE_NOTIFICATION = 1
-} NFCCMessageType;
-
-/**
  * Error code.
  */
 typedef enum {
@@ -193,34 +185,27 @@ typedef struct {
   NdefMessagePdu ndef;
 } NfcNdefReadWritePdu;
 
-typedef enum {
+enum class NfcRequest : uint32_t {
   /**
-   * NFC_REQUEST_CHANGE_RF_STATE
-   *
    * Change RF State.
    *
    * data is NfcChangeRFStateRequest.
    *
    * response is NfcChangeRFStateResponse.
    */
-  NFC_REQUEST_CHANGE_RF_STATE,
+  ChangeRFState,
 
   /**
-   * NFC_REQUEST_READ_NDEF
-   *
-   * Request the scanned NDEF message. The 'technology' field in
-   * NfcNotificationTechDiscovered must include NFC_TECH_NDEF.
+   * Request the scanned NDEF message.
    *
    * data is NfcSessionId, which is correlates to a technology that was
    * previously discovered with NFC_NOTIFICATION_TECH_DISCOVERED.
    *
    * response is NfcNdefReadWritePdu.
    */
-  NFC_REQUEST_READ_NDEF,
+  ReadNDEF,
 
   /**
-   * NFC_REQUEST_WRITE_NDEF
-   *
    * Write a NDEF message. The 'technology' field in
    * NfcNotificationTechDiscovered must be a p2p connection or
    * it is a writable tag.
@@ -229,11 +214,9 @@ typedef enum {
    *
    * response is NULL.
    */
-  NFC_REQUEST_WRITE_NDEF,
+  WriteNDEF,
 
   /**
-   * NFC_REQUEST_MAKE_NDEF_READ_ONLY
-   *
    * Make the NDEF message is read-only. The tag must be writable.
    *
    * data is NfcSessionId, which is correlates to a technology that was
@@ -241,11 +224,9 @@ typedef enum {
    *
    * response is NULL.
    */
-  NFC_REQUEST_MAKE_NDEF_READ_ONLY,
+  MakeReadOnly,
 
   /**
-   * NFC_REQUEST_FORMAT
-   *
    * Format a tag as NDEF
    *
    * data is NfcSessionId, which is correlates to a technology that was
@@ -253,19 +234,28 @@ typedef enum {
    *
    * response is NULL.
    */
-  NFC_REQUEST_FORMAT,
+  Format,
 
   /**
-   * NFC_RRQUEST_TRANSCEIVE
-   *
    * Send raw data to the tag;
    *
    * response is tag response data.
    */
-  NFC_REQUEST_TRANSCEIVE,
-} NfcRequestType;
+  Transceive,
+};
 
-typedef enum {
+enum class NfcResponse : uint32_t {
+  ChangeRFState,
+  ReadNDEF,
+  WriteNDEF,
+  MakeReadOnly,
+  Format,
+  Transceive,
+
+
+
+
+
   NFC_RESPONSE_GENERAL = 1000,
 
   NFC_RESPONSE_CHANGE_RF_STATE = 1001,

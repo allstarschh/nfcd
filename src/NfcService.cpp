@@ -46,7 +46,7 @@ typedef enum {
   MSG_SOCKET_CONNECTED,
   MSG_PUSH_NDEF,
   MSG_NDEF_TAG_LIST,
-  MSG_MAKE_NDEF_READONLY,
+  MSG_MAKE_READ_ONLY,
   MSG_LOW_POWER,
   MSG_ENABLE,
   MSG_RECEIVE_NDEF_EVENT,
@@ -375,8 +375,8 @@ void* NfcService::eventLoop()
         case MSG_PUSH_NDEF:
           handlePushNdefResponse(event);
           break;
-        case MSG_MAKE_NDEF_READONLY:
-          handleMakeNdefReadonlyResponse(event);
+        case MSG_MAKE_READ_ONLY:
+          handleMakeReadonlyResponse(event);
           break;
         case MSG_LOW_POWER:
           handleEnterLowPowerResponse(event);
@@ -433,7 +433,7 @@ bool NfcService::handleReadNdefRequest()
 
 void NfcService::handleReadNdefResponse(NfcEvent* event)
 {
-  NfcResponseType resType = NFC_RESPONSE_READ_NDEF;
+  NfcResponse resType = NFC_RESPONSE_READ_NDEF;
 
   INfcTag* pINfcTag = reinterpret_cast<INfcTag*>(sNfcManager->queryInterface(INTERFACE_TAG_MANAGER));
   if (!pINfcTag) {
@@ -481,7 +481,7 @@ bool NfcService::handleWriteNdefRequest(NdefMessage* ndef, bool isP2P)
 
 void NfcService::handleWriteNdefResponse(NfcEvent* event)
 {
-  NfcResponseType resType = NFC_RESPONSE_GENERAL;
+  NfcResponse resType = NFC_RESPONSE_GENERAL;
   NfcErrorCode code = NFC_SUCCESS;
 
   std::auto_ptr<NdefMessage> pNdef(reinterpret_cast<NdefMessage*>(event->obj));
@@ -525,7 +525,7 @@ bool NfcService::handlePushNdefRequest(NdefMessage* ndef)
 
 void NfcService::handlePushNdefResponse(NfcEvent* event)
 {
-  NfcResponseType resType = NFC_RESPONSE_GENERAL;
+  NfcResponse resType = NfcResponse::GENERAL;
 
   std::auto_ptr<NdefMessage> pNdef(reinterpret_cast<NdefMessage*>(event->obj));
   if (!pNdef.get()) {
@@ -538,15 +538,15 @@ void NfcService::handlePushNdefResponse(NfcEvent* event)
   mMsgHandler->processResponse(resType, NFC_SUCCESS, NULL);
 }
 
-bool NfcService::handleMakeNdefReadonlyRequest()
+bool NfcService::handleMakeReadonlyRequest()
 {
-  NfcEvent *event = new NfcEvent(MSG_MAKE_NDEF_READONLY);
+  NfcEvent *event = new NfcEvent(MSG_MAKE_READ_ONLY);
   mQueue.push_back(event);
   sem_post(&thread_sem);
   return true;
 }
 
-void NfcService::handleMakeNdefReadonlyResponse(NfcEvent* event)
+void NfcService::handleMakeReadonlyResponse(NfcEvent* event)
 {
   INfcTag* pINfcTag = reinterpret_cast<INfcTag*>
                       (sNfcManager->queryInterface(INTERFACE_TAG_MANAGER));
@@ -558,7 +558,7 @@ void NfcService::handleMakeNdefReadonlyResponse(NfcEvent* event)
   mMsgHandler->processResponse(NFC_RESPONSE_GENERAL, code, NULL);
 }
 
-bool NfcService::handleNdefFormatRequest()
+bool NfcService::handleFormatRequest()
 {
   NfcEvent *event = new NfcEvent(MSG_NDEF_FORMAT);
   mQueue.push_back(event);

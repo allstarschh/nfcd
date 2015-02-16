@@ -62,9 +62,9 @@ public:
   void handleCloseResponse(NfcEvent* event);
   bool handlePushNdefRequest(NdefMessage* ndef);
   void handlePushNdefResponse(NfcEvent* event);
-  bool handleMakeNdefReadonlyRequest();
-  void handleMakeNdefReadonlyResponse(NfcEvent* event);
-  bool handleNdefFormatRequest();
+  bool handleMakeReadonlyRequest();
+  void handleMakeReadonlyResponse(NfcEvent* event);
+  bool handleFormatRequest();
   void handleNdefFormatResponse(NfcEvent* event);
   bool handleTagTransceiveRequest(int tech, const uint8_t* buf, uint32_t bufLen);
   void handleTagTransceiveResponse(NfcEvent* event);
